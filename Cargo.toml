@@ -5,6 +5,7 @@ authors = ["Boltz <hi@bol.tz>"]
 edition = "2018"
 license = "MIT"
 description = "Parse BOLT12 offers"
+repository = "https://github.com/BoltzExchange/bolt12-wasm.git"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -15,6 +16,7 @@ lightning = { version = "0.0.124", features = ["no-std"], default-features = fal
 wasm-bindgen = "0.2.93"
 
 [dev-dependencies]
+hex = "0.4.3"
 wasm-bindgen-test = "0.3.43"
 
 [profile.release]
