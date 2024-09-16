@@ -12,11 +12,11 @@ Parse Bolt12 offers and invoices in JavaScript by compiling LDK to WASM
 ### Building
 
 ```bash
-wasm-pack build -t nodejs
+wasm-pack build
 ```
 
 ### Publishing
 
 ```bash
-wasm-pack publish -t nodejs
+wasm-pack publish
 ```

@@ -1,6 +1,6 @@
 [package]
 name = "boltz-bolt12"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Boltz <hi@bol.tz>"]
 edition = "2018"
 license = "MIT"
