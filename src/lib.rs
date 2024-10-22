@@ -1,8 +1,11 @@
+use crate::path::Path;
 use bech32::FromBase32;
 use lightning::offers::offer::Amount;
 use lightning::util::ser::Writeable;
 use std::convert::TryFrom;
 use wasm_bindgen::prelude::*;
+
+mod path;
 
 const BECH32_BOLT12_INVOICE_HRP: &str = "lni";
 
@@ -47,6 +50,15 @@ impl Offer {
     #[wasm_bindgen(getter)]
     pub fn description(&self) -> Option<String> {
         self.offer.description().map(|s| s.to_string())
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn paths(&self) -> Vec<Path> {
+        self.offer
+            .paths()
+            .iter()
+            .map(Path::from_message_path)
+            .collect()
     }
 }
 
@@ -95,5 +107,23 @@ impl Invoice {
     #[wasm_bindgen(getter)]
     pub fn description(&self) -> Option<String> {
         self.invoice.description().map(|s| s.to_string())
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn message_paths(&self) -> Vec<Path> {
+        self.invoice
+            .message_paths()
+            .iter()
+            .map(Path::from_message_path)
+            .collect()
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn payment_paths(&self) -> Vec<Path> {
+        self.invoice
+            .payment_paths()
+            .iter()
+            .map(Path::from_payment_path)
+            .collect()
     }
 }

@@ -25,6 +25,22 @@ fn test_decode_offer() {
 }
 
 #[wasm_bindgen_test]
+fn test_decode_offer_paths() {
+    let offer = Offer::new(
+        "lno1zrxq8pjw7qjlm68mtp7e3yvxee4y5xrgjhhyf2fxhlphpckrvevh50u0qtuzuc7vrxw3ptvmvzs7lqmyp94rhmfdg6gpef65rs2xxl2mzr2ksqszz0xxdd9y6653lwugyjqg6nwjerz4wcdskllmkp9fl4kp4d5z0hfqqvlxj7wm32qk0pavw6cr3kfn6unhzy9r25vlp4nmmy0gfck4ur7qk0xz43lhmnlx59qfxmdh6ue6y65s7rw4qdtdltt5gzratf3hnr668laqtcrk5tyzfz8a8ckq4dlpd40alv646qqsf6pgykhxlayyswqmjffpgehjjs"
+    ).unwrap();
+    let paths = offer.paths();
+    assert_eq!(paths.len(), 1);
+
+    let hops = paths[0].hops();
+    let last_hop = hops.last().unwrap();
+    assert_eq!(
+        hex::encode(last_hop.pubkey()),
+        "0356dfad744087d5a63798f5a3ffa05e076a2c82488fd3e2c0ab7e16d5fdfb355d"
+    );
+}
+
+#[wasm_bindgen_test]
 fn test_decode_offer_error() {
     assert!(Offer::new("invalid").is_err());
 }
@@ -44,6 +60,37 @@ fn test_decode_invoice() {
         "2d982b84ea00371268a126d7842e872067e3aa7fefc29a0c82e11a04598a6388"
     );
     assert_eq!(invoice.description(), Some("test".to_string()));
+}
+
+#[wasm_bindgen_test]
+fn test_decode_invoice_paths() {
+    let invoice = Invoice::new(
+        "lni1qqg0u9j0r86j5k5ejghfv8km59j7jyxvqwryaup9lh50kkranzgcdnn2fgvx390wgj5jd07rwr3vxeje0glc7qhc9e3ucxvazzkekc9pa7pkgzt280kj635srjn4g8q5vd74kyx4dqpqyy7vv662f44fr7acsfyq34xa9jx92asmpdllhvz2nltvr2mgylwjqqe7d9uahz5pv7r6ca4s8rvn84e8wyg2x4ge7rt8hkg7sn3dtc8upv7v9trl0h87dg2qjdkm04en5f4fpuxa2q6km7khgsy86knr0x8450l6qhs8dgkgyjy0603vp2m7zm2lm7e4t5qpqn5zsfdwdl6gfquphyjjz3n099zjqgp7skppq0x6py8g70pn6692tqke75e6y0wy9ejlc873vc6n4djzcsljr4jneg8aqxdq8pjw7qjlm68mtp7e3yvxee4y5xrgjhhyf2fxhlphpckrvevh50u0qts9zu98ca0z62ahjsh0v85a9ukaqyuev9u20gwk3mnwvh8hunugqqszld4aksgef0rnduusxfzauvynr3l9wp7lztth5hd9qtwj5vzm9xlsq3gcvvahd6x0a2cw529vyl0ukdwdg25wu0rcqmurp5wc55f44jjny5v6tlrls052ss58r490q4ds50f3cmzj2qqf4773q6eg5gfptvq4vlkfq2n9qq7xl53kta005252fnsfu2c383hjjysutxe3qdqq8zjl0ud8m5cskyqvch5net7dpawa7sjr5x8qu26t529hnnelvf70tmgxnj4umkfcncn7aaphtej4anf7r83qkkfdfasy09g2ha0wlct6t30w9qll0ak2ad6qjjztxz82h2he04pd6ulynyjyd9wlt5et5v4vmkdh9ky24wr6pyh280jrgc5twg9l2nvgm4nr6xawhaef92dhnmu4d3e0cfxsh0lx7kvhsjtz57lgr57elw9w9ndtjtl6xtzarxw6u3w98cpef7mzrneenq0vuj6345skqm88a0xkfpthgwdfc9ux4z79l48nspvfuf728uu48dt5rdfrsgpevg8c7d56y8qqqqp7sqqqqpjqzgqqqqqqqqqqq05qqqqqqqqqqp7sqqq2gpr8zlx8dfsrq9gcp2pq3djq6vxmenenj4g2t9qwzjvrywflec7gkkz0mx7zd59na6zxvkw25qsrazhqxqsqqzczzq6km7khgsy86knr0x8450l6qhs8dgkgyjy0603vp2m7zm2lm7e4thcyppr70nsjasuspk3ne7p72z33rdkz87507jdl6qrww9d3ye9zae45cxtnuf7h2tkk0stdx6k9s29h5z4veh8ptaptjzw6lmtr3ge6ncts"
+    ).unwrap();
+    assert_eq!(
+        hex::encode(invoice.signing_pubkey()),
+        "0356dfad744087d5a63798f5a3ffa05e076a2c82488fd3e2c0ab7e16d5fdfb355d"
+    );
+
+    let paths = invoice.message_paths();
+    assert_eq!(paths.len(), 1);
+
+    let hops = paths[0].hops();
+    let last_hop = hops.last().unwrap();
+    assert_eq!(
+        hex::encode(last_hop.pubkey()),
+        "0356dfad744087d5a63798f5a3ffa05e076a2c82488fd3e2c0ab7e16d5fdfb355d"
+    );
+
+    let paths = invoice.payment_paths();
+    assert_eq!(paths.len(), 1);
+
+    let hops = paths[0].hops();
+    let last_hop = hops.last().unwrap();
+    assert_eq!(
+        hex::encode(last_hop.pubkey()),
+        "03c6fd2365f5efa2a8a4ce09e2b113c6f29121c59b310340038a5f7f1a7dd310b1"
+    );
 }
 
 #[wasm_bindgen_test]
