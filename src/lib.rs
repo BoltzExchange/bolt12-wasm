@@ -120,7 +120,7 @@ pub struct Invoice {
 impl Invoice {
     #[wasm_bindgen(constructor)]
     pub fn new(invoice: &str) -> Result<Invoice, String> {
-        let p = match CheckedHrpstring::new::<NoChecksum>(&invoice) {
+        let p = match CheckedHrpstring::new::<NoChecksum>(invoice) {
             Ok(res) => res,
             Err(err) => return Err(format!("{:?}", err)),
         };
