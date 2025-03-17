@@ -1,5 +1,7 @@
 use crate::path::Path;
-use bech32::FromBase32;
+use bech32::primitives::decode::CheckedHrpstring;
+use bech32::NoChecksum;
+
 use lightning::offers::offer::Amount;
 use lightning::util::ser::Writeable;
 use std::convert::TryFrom;
@@ -32,7 +34,7 @@ impl Offer {
 
     #[wasm_bindgen(getter)]
     pub fn signing_pubkey(&self) -> Option<Vec<u8>> {
-        self.offer.signing_pubkey().map(|key| key.encode())
+        self.offer.issuer_signing_pubkey().map(|key| key.encode())
     }
 
     /// The minimum amount required for a successful payment of a single item
@@ -71,18 +73,14 @@ pub struct Invoice {
 impl Invoice {
     #[wasm_bindgen(constructor)]
     pub fn new(invoice: &str) -> Result<Invoice, String> {
-        let (hrp, data) = match bech32::decode_without_checksum(invoice) {
+        let p = match CheckedHrpstring::new::<NoChecksum>(&invoice) {
             Ok(res) => res,
             Err(err) => return Err(format!("{:?}", err)),
         };
-        if hrp != BECH32_BOLT12_INVOICE_HRP {
+        if p.hrp().to_lowercase() != BECH32_BOLT12_INVOICE_HRP {
             return Err("invalid HRP".into());
         }
-
-        let data = match Vec::<u8>::from_base32(&data) {
-            Ok(res) => res,
-            Err(err) => return Err(format!("{:?}", err)),
-        };
+        let data = p.byte_iter().collect::<Vec<u8>>();
         match lightning::offers::invoice::Bolt12Invoice::try_from(data) {
             Ok(invoice) => Ok(Invoice { invoice }),
             Err(err) => Err(format!("{:?}", err)),
