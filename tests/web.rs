@@ -41,6 +41,22 @@ fn test_decode_offer_paths() {
 }
 
 #[wasm_bindgen_test]
+fn test_decode_offer_scid_paths() {
+    let offer = Offer::new(
+        "lno1pgx9getnwss8vetrw3hhyucs3yqqqqqqqqqqqqp2qgpqyqszqgpqyqszqgpqyqszqgpqyqszqgpqyqszqgpqyqszqgpqyqszqgpqyqszqgpqyqszqgpqyqszqgpqyqszqgpqyqszqgpqyqszqgpqqyqqqqqqqqqqqqqqqqqqqqqqqqqqqgpqyqszqgpqyqszqgpqyqszqgpqyqszqgpqyqszqgpqyqszqgpqyqqgzyg3zyg3zyg3z93pqthvwfzadd7jejes8q9lhc4rvjxd022zv5l44g6qah82ru5rdpnpj"
+    ).unwrap();
+    let paths = offer.paths();
+    assert_eq!(paths.len(), 1);
+
+    let hops = paths[0].hops();
+    let last_hop = hops.last().unwrap();
+    assert_eq!(
+        hex::encode(last_hop.pubkey()),
+        "020202020202020202020202020202020202020202020202020202020202020202"
+    );
+}
+
+#[wasm_bindgen_test]
 fn test_decode_offer_error() {
     assert!(Offer::new("invalid").is_err());
 }
