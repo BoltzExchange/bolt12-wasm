@@ -121,7 +121,7 @@ fn test_decode_offer_quantity() {
     )
     .unwrap();
     let quantity = offer.quantity();
-    assert_eq!(quantity, Some(0));
+    assert_eq!(quantity, None);
 
     let offer = Offer::new(
         "lno1pgx9getnwss8vetrw3hhyuc5qyq3vggzamrjghtt05kvkvpcp0a79gmy3nt6jsn98ad2xs8de6sl9qmgvcvs",

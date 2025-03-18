@@ -80,7 +80,7 @@ impl Offer {
     pub fn quantity(&self) -> Option<u64> {
         match self.offer.supported_quantity() {
             lightning::offers::offer::Quantity::Bounded(n) => Some(n.get()),
-            lightning::offers::offer::Quantity::Unbounded => Some(0),
+            lightning::offers::offer::Quantity::Unbounded => None,
             lightning::offers::offer::Quantity::One => Some(1),
         }
     }
