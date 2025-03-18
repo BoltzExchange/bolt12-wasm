@@ -31,7 +31,12 @@ fn test_decode_offer_paths() {
     ).unwrap();
     let paths = offer.paths();
     assert_eq!(paths.len(), 1);
-
+    let introduction_node = paths[0].introduction_node().unwrap();
+    assert_eq!(
+        hex::encode(introduction_node),
+        "03864ef025fde8fb587d989186ce6a4a186895ee44a926bfc370e2c366597a3f8f"
+    );
+    assert_eq!(paths[0].introduction_node_short_channel_id(), None);
     let hops = paths[0].hops();
     let last_hop = hops.last().unwrap();
     assert_eq!(
@@ -48,6 +53,9 @@ fn test_decode_offer_scid_paths() {
     let paths = offer.paths();
     assert_eq!(paths.len(), 1);
 
+    assert_eq!(paths[0].introduction_node(), None);
+    let scid = paths[0].introduction_node_short_channel_id().unwrap();
+    assert_eq!(hex::encode(scid), "00000000000000002a");
     let hops = paths[0].hops();
     let last_hop = hops.last().unwrap();
     assert_eq!(
