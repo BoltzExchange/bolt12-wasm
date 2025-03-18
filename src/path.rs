@@ -32,8 +32,8 @@ impl Hop {
 #[wasm_bindgen(inspectable)]
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct DirectedShortChannelId {
-    // the direction of the short_channel_id. 0 for the lesser node id compared
-    // lexicographically in ascending order, 1 for the greater node id.
+    // The direction of the short_channel_id. 
+    // 0 for the lesser node id compared lexicographically in ascending order, 1 for the greater node id.
     direction: u8,
     short_channel_id: u64,
 }
