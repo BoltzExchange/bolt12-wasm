@@ -2,7 +2,7 @@
 
 extern crate wasm_bindgen_test;
 
-use boltz_bolt12::{Invoice, Offer};
+use boltz_bolt12::{Invoice, Network, Offer};
 use wasm_bindgen_test::*;
 
 wasm_bindgen_test_configure!(run_in_browser);
@@ -31,13 +31,112 @@ fn test_decode_offer_paths() {
     ).unwrap();
     let paths = offer.paths();
     assert_eq!(paths.len(), 1);
-
+    let introduction_node = paths[0].introduction_node().unwrap();
+    assert_eq!(
+        hex::encode(introduction_node),
+        "03864ef025fde8fb587d989186ce6a4a186895ee44a926bfc370e2c366597a3f8f"
+    );
+    assert_eq!(paths[0].introduction_node_short_channel_id(), None);
     let hops = paths[0].hops();
     let last_hop = hops.last().unwrap();
     assert_eq!(
         hex::encode(last_hop.pubkey()),
         "0356dfad744087d5a63798f5a3ffa05e076a2c82488fd3e2c0ab7e16d5fdfb355d"
     );
+}
+
+#[wasm_bindgen_test]
+fn test_decode_offer_scid_paths() {
+    let offer = Offer::new(
+        "lno1pgx9getnwss8vetrw3hhyucs3yqqqqqqqqqqqqp2qgpqyqszqgpqyqszqgpqyqszqgpqyqszqgpqyqszqgpqyqszqgpqyqszqgpqyqszqgpqyqszqgpqyqszqgpqyqszqgpqyqszqgpqyqszqgpqqyqqqqqqqqqqqqqqqqqqqqqqqqqqqgpqyqszqgpqyqszqgpqyqszqgpqyqszqgpqyqszqgpqyqszqgpqyqqgzyg3zyg3zyg3z93pqthvwfzadd7jejes8q9lhc4rvjxd022zv5l44g6qah82ru5rdpnpj"
+    ).unwrap();
+    let paths = offer.paths();
+    assert_eq!(paths.len(), 1);
+
+    assert_eq!(paths[0].introduction_node(), None);
+    let scid = paths[0].introduction_node_short_channel_id().unwrap();
+    assert_eq!(scid.short_channel_id, 42);
+    let hops = paths[0].hops();
+    let last_hop = hops.last().unwrap();
+    assert_eq!(
+        hex::encode(last_hop.pubkey()),
+        "020202020202020202020202020202020202020202020202020202020202020202"
+    );
+}
+
+#[wasm_bindgen_test]
+fn test_decode_offer_multiple_chains() {
+    let offer = Offer::new(
+        "lno1qfqpge38tqmzyrdjj3x2qkdr5y80dlfw56ztq6yd9sme995g3gsxqqm0u2xq4dh3kdevrf4zg6hx8a60jv0gxe0ptgyfc6xkryqqqqqqqq9qc4r9wd6zqan9vd6x7unnzcss9mk8y3wkklfvevcrszlmu23kfrxh49px20665dqwmn4p72pksese"
+    ).unwrap();
+    let chains = offer.chains();
+    assert_eq!(chains.len(), 2);
+    assert_eq!(chains[0], Network::Unkown);
+    assert_eq!(chains[1], Network::Bitcoin);
+
+    let offer = Offer::new(
+        "lno1qgsyxjtl6luzd9t3pr62xr7eemp6awnejusgf6gw45q75vcfqqqqqqq2p32x2um5ypmx2cm5dae8x93pqthvwfzadd7jejes8q9lhc4rvjxd022zv5l44g6qah82ru5rdpnpj"
+    ).unwrap();
+    let chains = offer.chains();
+    assert_eq!(chains.len(), 1);
+    assert_eq!(chains[0], Network::Testnet3);
+}
+
+#[wasm_bindgen_test]
+fn test_decode_offer_expiry() {
+    let offer = Offer::new(
+        "lno1qgsyxjtl6luzd9t3pr62xr7eemp6awnejusgf6gw45q75vcfqqqqqqq2p32x2um5ypmx2cm5dae8x93pqthvwfzadd7jejes8q9lhc4rvjxd022zv5l44g6qah82ru5rdpnpj"
+    ).unwrap();
+    let expiry = offer.expiry();
+    assert_eq!(expiry, None);
+
+    let offer = Offer::new(
+        "lno1pgx9getnwss8vetrw3hhyucwq3ay997czcss9mk8y3wkklfvevcrszlmu23kfrxh49px20665dqwmn4p72pksese"
+    ).unwrap();
+    let expiry = offer.expiry();
+    assert_eq!(expiry, Some(2051184600));
+}
+
+#[wasm_bindgen_test]
+fn test_decode_offer_issuer() {
+    let offer = Offer::new(
+        "lno1qgsyxjtl6luzd9t3pr62xr7eemp6awnejusgf6gw45q75vcfqqqqqqq2p32x2um5ypmx2cm5dae8x93pqthvwfzadd7jejes8q9lhc4rvjxd022zv5l44g6qah82ru5rdpnpj"
+    ).unwrap();
+    let issuer = offer.issuer();
+    assert_eq!(issuer, None);
+
+    let offer = Offer::new(
+        "lno1pgx9getnwss8vetrw3hhyucjy358garswvaz7tmzdak8gvfj9ehhyeeqgf85c4p3xgsxjmnyw4ehgunfv4e3vggzamrjghtt05kvkvpcp0a79gmy3nt6jsn98ad2xs8de6sl9qmgvcvs"
+    ).unwrap();
+    let issuer = offer.issuer();
+    assert_eq!(
+        issuer,
+        Some("https://bolt12.org BOLT12 industries".to_string())
+    );
+}
+
+#[wasm_bindgen_test]
+fn test_decode_offer_quantity() {
+    let offer = Offer::new(
+        "lno1pgx9getnwss8vetrw3hhyuc5qyz3vggzamrjghtt05kvkvpcp0a79gmy3nt6jsn98ad2xs8de6sl9qmgvcvs",
+    )
+    .unwrap();
+    let quantity = offer.quantity();
+    assert_eq!(quantity, Some(5));
+
+    let offer = Offer::new(
+        "lno1pgx9getnwss8vetrw3hhyuc5qqtzzqhwcuj966ma9n9nqwqtl032xeyv6755yeflt235pmww58egx6rxry",
+    )
+    .unwrap();
+    let quantity = offer.quantity();
+    assert_eq!(quantity, None);
+
+    let offer = Offer::new(
+        "lno1pgx9getnwss8vetrw3hhyuc5qyq3vggzamrjghtt05kvkvpcp0a79gmy3nt6jsn98ad2xs8de6sl9qmgvcvs",
+    )
+    .unwrap();
+    let quantity = offer.quantity();
+    assert_eq!(quantity, Some(1));
 }
 
 #[wasm_bindgen_test]

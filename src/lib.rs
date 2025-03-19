@@ -1,5 +1,8 @@
 use crate::path::Path;
-use bech32::FromBase32;
+use bech32::primitives::decode::CheckedHrpstring;
+use bech32::NoChecksum;
+
+use lightning::bitcoin::constants::ChainHash;
 use lightning::offers::offer::Amount;
 use lightning::util::ser::Writeable;
 use std::convert::TryFrom;
@@ -12,6 +15,17 @@ const BECH32_BOLT12_INVOICE_HRP: &str = "lni";
 #[wasm_bindgen(inspectable)]
 pub struct Offer {
     offer: lightning::offers::offer::Offer,
+}
+
+#[wasm_bindgen]
+#[derive(Clone, Debug, PartialEq)]
+pub enum Network {
+    Bitcoin,
+    Testnet3,
+    Testnet4,
+    Signet,
+    Regtest,
+    Unkown,
 }
 
 #[wasm_bindgen]
@@ -32,7 +46,7 @@ impl Offer {
 
     #[wasm_bindgen(getter)]
     pub fn signing_pubkey(&self) -> Option<Vec<u8>> {
-        self.offer.signing_pubkey().map(|key| key.encode())
+        self.offer.issuer_signing_pubkey().map(|key| key.encode())
     }
 
     /// The minimum amount required for a successful payment of a single item
@@ -50,6 +64,41 @@ impl Offer {
     #[wasm_bindgen(getter)]
     pub fn description(&self) -> Option<String> {
         self.offer.description().map(|s| s.to_string())
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn expiry(&self) -> Option<u64> {
+        self.offer.absolute_expiry().map(|d| d.as_secs())
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn issuer(&self) -> Option<String> {
+        self.offer.issuer().map(|s| s.to_string())
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn quantity(&self) -> Option<u64> {
+        match self.offer.supported_quantity() {
+            lightning::offers::offer::Quantity::Bounded(n) => Some(n.get()),
+            lightning::offers::offer::Quantity::Unbounded => None,
+            lightning::offers::offer::Quantity::One => Some(1),
+        }
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn chains(&self) -> Vec<Network> {
+        self.offer
+            .chains()
+            .iter()
+            .map(|chain| match *chain {
+                ChainHash::BITCOIN => Network::Bitcoin,
+                ChainHash::TESTNET3 => Network::Testnet3,
+                ChainHash::TESTNET4 => Network::Testnet4,
+                ChainHash::SIGNET => Network::Signet,
+                ChainHash::REGTEST => Network::Regtest,
+                _ => Network::Unkown,
+            })
+            .collect()
     }
 
     #[wasm_bindgen(getter)]
@@ -71,18 +120,14 @@ pub struct Invoice {
 impl Invoice {
     #[wasm_bindgen(constructor)]
     pub fn new(invoice: &str) -> Result<Invoice, String> {
-        let (hrp, data) = match bech32::decode_without_checksum(invoice) {
+        let p = match CheckedHrpstring::new::<NoChecksum>(invoice) {
             Ok(res) => res,
             Err(err) => return Err(format!("{:?}", err)),
         };
-        if hrp != BECH32_BOLT12_INVOICE_HRP {
+        if p.hrp().to_lowercase() != BECH32_BOLT12_INVOICE_HRP {
             return Err("invalid HRP".into());
         }
-
-        let data = match Vec::<u8>::from_base32(&data) {
-            Ok(res) => res,
-            Err(err) => return Err(format!("{:?}", err)),
-        };
+        let data = p.byte_iter().collect::<Vec<u8>>();
         match lightning::offers::invoice::Bolt12Invoice::try_from(data) {
             Ok(invoice) => Ok(Invoice { invoice }),
             Err(err) => Err(format!("{:?}", err)),
