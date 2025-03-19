@@ -32,10 +32,10 @@ impl Hop {
 #[wasm_bindgen(inspectable)]
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct DirectedShortChannelId {
-    // The direction of the short_channel_id. 
+    // The direction of the short_channel_id.
     // 0 for the lesser node id compared lexicographically in ascending order, 1 for the greater node id.
-    direction: u8,
-    short_channel_id: u64,
+    pub direction: u8,
+    pub short_channel_id: u64,
 }
 
 impl DirectedShortChannelId {
@@ -44,13 +44,6 @@ impl DirectedShortChannelId {
             direction,
             short_channel_id,
         }
-    }
-
-    pub fn encode(&self) -> Vec<u8> {
-        let mut bytes = Vec::new();
-        bytes.push(self.direction);
-        bytes.extend_from_slice(&self.short_channel_id.to_be_bytes());
-        bytes
     }
 }
 
@@ -120,9 +113,8 @@ impl Path {
     }
 
     #[wasm_bindgen(getter)]
-    pub fn introduction_node_short_channel_id(&self) -> Option<Vec<u8>> {
+    pub fn introduction_node_short_channel_id(&self) -> Option<DirectedShortChannelId> {
         self.introduction_node_short_channel_id
-            .map(|scid| scid.encode())
     }
 
     #[wasm_bindgen(getter)]

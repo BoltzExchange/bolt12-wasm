@@ -55,7 +55,7 @@ fn test_decode_offer_scid_paths() {
 
     assert_eq!(paths[0].introduction_node(), None);
     let scid = paths[0].introduction_node_short_channel_id().unwrap();
-    assert_eq!(hex::encode(scid), "00000000000000002a");
+    assert_eq!(scid.short_channel_id, 42);
     let hops = paths[0].hops();
     let last_hop = hops.last().unwrap();
     assert_eq!(
